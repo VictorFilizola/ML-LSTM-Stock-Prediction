@@ -1,0 +1,11 @@
+tensorflow
+scikit-learn
+pandas
+numpy
+yfinance
+fastapi
+uvicorn[standard]
+mlflow
+requests
+python-multipart
+matplotlib
