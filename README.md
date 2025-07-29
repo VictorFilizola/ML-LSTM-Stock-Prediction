@@ -11,6 +11,7 @@ This project uses a Long Short-Term Memory (LSTM) neural network to predict the 
 ## Project Structure
 
 ```
+.
 ├── main.ipynb              # Jupyter Notebook for model training and experimentation
 ├── main.py                 # FastAPI application to serve the model
 ├── client_test.py          # Example script to consume the prediction API
@@ -115,33 +116,69 @@ This script will send a request to the FastAPI server and print the result.
 2. Execute the client script:
 
 ```bash
-python client.py
+python client_test.py
 ```
 
-The terminal will display the predicted closing price for the next day. You can also check the MLflow UI to see the newly logged prediction run.
+The terminal will display the results from all API endpoints. You can also check the MLflow UI to see the newly logged prediction runs.
 
 ---
 
-## API Endpoint
+## API Endpoints
 
 ### `GET /predict/{days_to_predict}`
 
-**Description:** Fetches the last 60 days of AMZN stock data, preprocesses it, and returns the predicted closing price for the next trading day.
+**Description:** Predicts the closing price for a specified number of future business days.
 
-**Method:** GET
+**Path Parameter:**
+- `days_to_predict` (integer): The number of days to forecast (e.g., `/predict/7` for a 7-day forecast). Must be between 1 and 90.
 
 **Success Response (200 OK):**
 ```json
 {
-  "model_used": "best_model.h5",
+  "prediction_type": "7-Day Forecast",
   "last_known_close_price": 185.57,
-  "predicted_next_day_close_price": 186.25
+  "predicted_prices": {
+    "2024-08-27": 186.25,
+    "2024-08-28": 187.01,
+    "...": "..."
+  }
 }
 ```
 
-**Error Response:**
+### `GET /history`
+
+**Description:** Fetches recent historical stock data for AMZN.
+
+**Query Parameter:**
+- `period` (string, optional): The time period. Defaults to `3mo`. Allowed values: `1mo`, `3mo`, `6mo`, `1y`, `5y`.
+
+**Example:** `http://127.0.0.1:8000/history?period=1mo`
+
+**Success Response (200 OK):**
 ```json
 {
-  "error": "Not enough historical data available. Found only 58 days."
+  "2024-07-26": {
+    "Open": 184.08,
+    "High": 185.75,
+    "Low": 183.53,
+    "Close": 185.57,
+    "Volume": 35834100
+  },
+  "...": "..."
 }
 ```
+
+### `GET /model-info`
+
+**Description:** Provides metadata about the machine learning model being used.
+
+**Success Response (200 OK):**
+```json
+{
+  "model_file": "best_model.h5",
+  "scaler_file": "scaler.pkl",
+  "model_last_modified_utc": "2024-08-26 14:30:00",
+  "features_used": ["Open", "High", "Low", "Close", "Volume"]
+}
+```
+
